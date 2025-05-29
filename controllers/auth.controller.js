@@ -221,9 +221,7 @@ exports.logoutResident = asyncHandler(async (req, res) => {
 
 exports.loginSecurity = asyncHandler(async (req, res) => {
     // console.log(req.body);
-
     const { username } = req.body;
-
     if (!username) {
         return res.status(400).json({ message: "Please fill all fields" });
     }
@@ -234,7 +232,6 @@ exports.loginSecurity = asyncHandler(async (req, res) => {
     if (!isEmail && !isPhone) {
         return res.status(400).json({ message: "Invalid email or phone number" });
     }
-
     // const query = isEmail ? { email: username } : { phone: username };
 
     const security = await Security.findOne({
@@ -258,12 +255,29 @@ exports.loginSecurity = asyncHandler(async (req, res) => {
 // @route POST /api/auth/security/verify-otp
 
 exports.verifySecurityOTP = asyncHandler(async (req, res) => {
-    const { otp } = req.body;
-    if (!otp) {
+    const { username, otp } = req.body;
+
+    if (!otp || !username) {
         return res.status(400).json({ message: "Please fill all fields" });
     }
-    res.status(200).json({ message: "Security logged in successfully" });
+
+    const security = await Security.findOne({
+        $or: [{ email: username }, { phone: username }],
+    });
+
+    if (!security) {
+        return res.status(400).json({ message: "Security user not found" });
+    }
+
+    if (security.otp !== otp || Date.now() - security.otpSendOn > 5 * 60 * 1000) {
+        return res.status(400).json({ message: "Invalid or expired OTP" });
+    }
+
+    await Security.findByIdAndUpdate(security._id, { otp: null }); // Clear OTP after verification
+
+    return res.status(200).json({ message: "Security logged in successfully" });
 });
+
 
 
 // @desc Logout resident
