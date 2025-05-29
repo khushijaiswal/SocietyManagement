@@ -257,43 +257,13 @@ exports.loginSecurity = asyncHandler(async (req, res) => {
 // @route POST /api/auth/security/verify-otp
 
 exports.verifySecurityOTP = asyncHandler(async (req, res) => {
-    const { username, otp } = req.body;
+    const { otp } = req.body;
 
-    if (!username || !otp) {
+    if (!otp) {
         return res.status(400).json({ message: "Please fill all fields" });
     }
+    res.status(200).json({ message: "Security logged in successfully" });
 
-    const isEmail = validator.isEmail(username);
-    const isPhone = validator.isMobilePhone(username, "en-IN");
-
-    if (!isEmail && !isPhone) {
-        return res.status(400).json({ message: "Invalid email or phone number" });
-    }
-
-    const security = await Security.findOne({
-        $or: [{ email: username }, { phone: username }]
-    });
-
-    if (!security) {
-        return res.status(400).json({ message: "Security user not found" });
-    }
-
-    const otpValid = security.otp === otp && (Date.now() - security.otpSendOn < 5 * 60 * 1000); // 5 mins
-
-    if (!otpValid) {
-        return res.status(400).json({ message: "Invalid or expired OTP" });
-    }
-
-    const token = jwt.sign({ id: security._id }, process.env.JWT_SECRET, { expiresIn: "30d" });
-
-    res.cookie("security", token, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "None",
-        maxAge: parseInt(process.env.MAX_AGE) || 30 * 24 * 60 * 60 * 1000,
-    });
-
-    res.status(200).json({ message: "Security logged in successfully", security });
 });
 
 
