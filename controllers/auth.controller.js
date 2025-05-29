@@ -247,10 +247,11 @@ exports.loginSecurity = asyncHandler(async (req, res) => {
 
     const otp = generateOTP();
     await Security.findByIdAndUpdate(security._id, { otp, otpSendOn: Date.now() })
+    const token = jwt.sign({ _id: security._id }, process.env.JWT_SECRET, { expiresIn: '30d' })
+    res.cookie('security', token, { httpOnly: true, secure: true, sameSite: "None", maxAge: process.env.MAX_AGE });
     // TODO: send OTP via SMS/Email here
     return res.status(200).json({ message: `OTP sent to ${username}` });
 });
-
 
 
 // @desc Verify OTP for security login
@@ -258,12 +259,10 @@ exports.loginSecurity = asyncHandler(async (req, res) => {
 
 exports.verifySecurityOTP = asyncHandler(async (req, res) => {
     const { otp } = req.body;
-
     if (!otp) {
         return res.status(400).json({ message: "Please fill all fields" });
     }
     res.status(200).json({ message: "Security logged in successfully" });
-
 });
 
 

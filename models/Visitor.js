@@ -26,6 +26,9 @@ const visitorSchema = new Schema({
         type: Date,
         default: null
     },
+    vehicle: {
+        type: String
+    },
     // residentId: {
     //     type: Schema.Types.ObjectId,
     //     ref: 'Resident',
@@ -34,7 +37,7 @@ const visitorSchema = new Schema({
     guardId: {
         type: Schema.Types.ObjectId,
         ref: 'Security',
-        required: true
+        // required: true
     },
 }, {
     timestamps: true
