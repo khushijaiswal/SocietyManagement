@@ -74,15 +74,17 @@ exports.registerSecurity = asyncHandler(async (req, res) => {
     }
 
     // Create new security
-    const newSecurity = await Security.create({
-        name,
-        email,
-        phone,
-        shift,
-        assignedArea,
-        dateOfJoining,
-        isActive: true,
-    });
+    // const newSecurity = await Security.create({
+    //     name,
+    //     email,
+    //     phone,
+    //     shift,
+    //     assignedArea,
+    //     dateOfJoining,
+    //     isActive: true,
+    // });
+
+    const newSecurit = await Security.create(req.body)
     return res.status(201).json({ message: "Security registered successfully", newSecurity });
 }
 

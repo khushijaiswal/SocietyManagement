@@ -220,7 +220,7 @@ exports.logoutResident = asyncHandler(async (req, res) => {
 // @route POST /api/auth/security/login
 
 exports.loginSecurity = asyncHandler(async (req, res) => {
-    console.log(req.body);
+    // console.log(req.body);
 
     const { username } = req.body;
 
@@ -235,21 +235,19 @@ exports.loginSecurity = asyncHandler(async (req, res) => {
         return res.status(400).json({ message: "Invalid email or phone number" });
     }
 
-    const query = isEmail ? { email: username } : { phone: username };
+    // const query = isEmail ? { email: username } : { phone: username };
 
-    const security = await Security.findOne(query);
+    const security = await Security.findOne({
+        $or: [{ email: username }, { phone: username }]
+    });
 
     if (!security) {
         return res.status(400).json({ message: "Security user not found" });
     }
 
     const otp = generateOTP();
-    security.otp = otp;
-    security.otpSendOn = Date.now();
-    await security.save();
-
+    await Security.findByIdAndUpdate(security._id, { otp, otpSendOn: Date.now() })
     // TODO: send OTP via SMS/Email here
-
     return res.status(200).json({ message: `OTP sent to ${username}` });
 });
 
@@ -273,7 +271,7 @@ exports.verifySecurityOTP = asyncHandler(async (req, res) => {
     }
 
     const security = await Security.findOne({
-        $or: [{ email: isEmail ? username : null }, { phone: isPhone ? username : null }]
+        $or: [{ email: username }, { phone: username }]
     });
 
     if (!security) {
