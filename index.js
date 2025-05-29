@@ -16,6 +16,8 @@ const { adminprotected, residentProtected, securityProtected } = require("./midd
 // const app = express()
 app.use(express.json()) // req.body
 app.use(cookieParser()) // req.cookies
+app.use(express.static("dist"))
+
 app.use(cors({
     origin: true,
     credentials: true // cookie
@@ -33,6 +35,9 @@ app.use("*", (req, res) => {
     res.status(404).json({ message: "resource not found" })
 })
 
+app.use("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "dist", "index.html"))
+})
 app.use((err, req, res, next) => {
     res.status(500).json({ message: 'Server Error', error: err.message })
 })

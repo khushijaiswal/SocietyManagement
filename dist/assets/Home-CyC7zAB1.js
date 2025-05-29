@@ -1,0 +1,1 @@
+import{j as a,B as e,e as o}from"./index-BNH9iTYT.js";const t=()=>a.jsxs(e,{sx:{padding:2,backgroundColor:"background.default"},children:[a.jsx(o,{variant:"h4",gutterBottom:!0,children:"Welcome to Our Society Management App!"}),a.jsx(o,{variant:"body1",children:"Track complaints, manage payments, monitor visitors, and more—all in one place."})]});export{t as default};

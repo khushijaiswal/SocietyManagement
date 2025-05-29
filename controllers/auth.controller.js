@@ -7,7 +7,7 @@ const Resident = require("../models/Resident");
 const Security = require("../models/Security");
 const redisClient = require("./../utils/redisClient");
 const validator = require("validator");
-const { generateOTP } = require("../utils/otp");
+const generateOTP = require("../utils/otp")
 require("dotenv").config();
 
 // @desc Register a new admin
@@ -220,6 +220,8 @@ exports.logoutResident = asyncHandler(async (req, res) => {
 // @route POST /api/auth/security/login
 
 exports.loginSecurity = asyncHandler(async (req, res) => {
+    console.log(req.body);
+
     const { username } = req.body;
 
     if (!username) {
@@ -233,29 +235,24 @@ exports.loginSecurity = asyncHandler(async (req, res) => {
         return res.status(400).json({ message: "Invalid email or phone number" });
     }
 
-    // Find user
-    const security = await Security.findOne({
-        $or: [{ email: isEmail ? username : null }, { phone: isPhone ? username : null }]
-    });
+    const query = isEmail ? { email: username } : { phone: username };
+
+    const security = await Security.findOne(query);
 
     if (!security) {
         return res.status(400).json({ message: "Security user not found" });
     }
 
-    // Generate OTP
-    const otp = generateOTP(); // e.g. 6-digit numeric
+    const otp = generateOTP();
     security.otp = otp;
     security.otpSendOn = Date.now();
-    await security.findbyIdAndUpdate(security._id, {
-        otp,
-        otpSendOn: security.otpSendOn
-    });
+    await security.save();
 
-    // Send OTP (via SMS or Email)
-    res.json({ message: `OTP sent to ${username}: ${otp}` }); // Replace with real SMS API
+    // TODO: send OTP via SMS/Email here
 
-    res.status(200).json({ message: "OTP sent successfully" });
+    return res.status(200).json({ message: `OTP sent to ${username}` });
 });
+
 
 
 // @desc Verify OTP for security login
