@@ -4,7 +4,7 @@ const Visitor = require('../models/Visitor');
 
 exports.createVisitor = asyncHandler(async (req, res) => {
     const { name, phone, flatNumber, purpose, dateIn, dateOut } = req.body;
-    const guardId = req.user;
+    const guardId = req.security;
 
     if (!name || !phone || !flatNumber || !purpose) {
         return res.status(400).json({ message: "Please fill all the fields" });

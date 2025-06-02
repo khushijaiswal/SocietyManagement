@@ -72,7 +72,7 @@ exports.securityProtected = async (req, res, next) => {
             return res.status(401).json({ message: "account block by admin" })
         }
 
-        req.user = decode.id
+        req.security = decode.id
         next()
     })
 

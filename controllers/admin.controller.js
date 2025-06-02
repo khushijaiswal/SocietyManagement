@@ -84,7 +84,7 @@ exports.registerSecurity = asyncHandler(async (req, res) => {
     //     isActive: true,
     // });
 
-    const newSecurit = await Security.create(req.body)
+    const newSecurity = await Security.create(req.body)
     return res.status(201).json({ message: "Security registered successfully", newSecurity });
 }
 
@@ -133,7 +133,7 @@ exports.getAllSecurity = asyncHandler(async (req, res) => {
 // get all visitors
 exports.getAllVisitors = asyncHandler(async (req, res) => {
     try {
-        const visitors = await Visitor.find().select("-__v")
+        const visitors = await Visitor.find().select("-__v").populate('guardId', 'name phone')
         return res.status(200).json({ message: "All visitors fetched successfully", visitors });
     }
     catch (error) {
@@ -162,8 +162,6 @@ exports.updateCompliantStatus = asyncHandler(async (req, res) => {
     // await complaint.save()
     return res.status(200).json({ message: "Complaint status updated successfully", complaint })
 })
-
-
 
 
 // amenities
