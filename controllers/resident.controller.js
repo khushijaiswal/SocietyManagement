@@ -134,7 +134,7 @@ exports.viewNoticeForLoggedInResident = asyncHandler(async (req, res) => {
 
 exports.viewVisitors = asyncHandler(async (req, res) => {
     try {
-        const visitors = await Visitor.find({ residentId: req.user._id });
+        const visitors = await Visitor.find();
         if (!visitors || visitors.length === 0) {
             return res.status(404).json({ message: "No visitors found" });
         }

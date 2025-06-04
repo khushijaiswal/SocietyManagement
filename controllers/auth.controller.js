@@ -274,7 +274,8 @@ exports.verifySecurityOTP = asyncHandler(async (req, res) => {
     }
 
     await Security.findByIdAndUpdate(security._id, { otp: null }); // Clear OTP after verification
-
+    const token = jwt.sign({ _id: security._id }, process.env.JWT_SECRET, { expiresIn: '30d' })
+    res.cookie('security', token, { httpOnly: true, secure: false, sameSite: "None", maxAge: process.env.MAX_AGE });
     return res.status(200).json({ message: "Security logged in successfully" });
 });
 

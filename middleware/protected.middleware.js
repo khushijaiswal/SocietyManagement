@@ -63,7 +63,7 @@ exports.securityProtected = async (req, res, next) => {
         if (err) {
             return res.status(401).json({ message: "invalid token" })
         }
-        const result = await Security.findById(decode.id)
+        const result = await Security.findById(decode._id)
         if (!result) {
             // console.log("id", decode._id)
             return res.status(401).json({ message: "invalid security id" })
@@ -72,7 +72,7 @@ exports.securityProtected = async (req, res, next) => {
             return res.status(401).json({ message: "account block by admin" })
         }
 
-        req.security = decode.id
+        req.security = decode._id
         next()
     })
 
