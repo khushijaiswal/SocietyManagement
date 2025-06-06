@@ -59,6 +59,14 @@ exports.maintenancePayment = asyncHandler(async (req, res) => {
     if (!amount || !month || !year || !paymentMethod) {
         return res.status(400).json({ message: "Please fill all fields" });
     }
+    // resident.controller.js
+    const setting = await MaintenanceSetting.findOne({ isActive: true });
+    const expectedAmount = setting.frequency === 'Quarterly' ? setting.amount * 3 : setting.amount;
+
+    if (req.body.amount !== expectedAmount) {
+        return res.status(400).json({ message: "Amount mismatch with frequency" });
+    }
+
 
     // Optional: check for duplicate payment
     const existingPayment = await Maintenance.findOne({
