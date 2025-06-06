@@ -17,6 +17,7 @@ router
 
     .get('/allvisitors', getAllVisitors)
     .get('/allsecurity', getAllSecurity)
+    .get('/allamenities', viewAllAmenities)
 
     .get('/view-amenities-bookings', viewAmenitiesBookings)
     .get('/view-all-maintenance-payments', viewAllMaintenancePayments)

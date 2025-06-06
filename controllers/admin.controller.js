@@ -192,6 +192,19 @@ exports.addAmenities = asyncHandler(async (req, res) => {
     })
 });
 
+exports.viewAllAmenities = asyncHandler(async (req, res) => {
+    try {
+        const amenities = await Amenities.find();
+        if (!amenities || amenities.length === 0) {
+            return res.status(404).json({ message: "No amenities found" });
+        }
+        return res.status(200).json({ message: "Amenities fetched successfully", amenities });
+    }
+    catch (error) {
+        return res.status(500).json({ message: "Error fetching amenities", error: error.message });
+    }
+}
+);
 
 // view amenitites requests
 exports.viewAmenitiesBookings = asyncHandler(async (req, res) => {
