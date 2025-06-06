@@ -1,4 +1,4 @@
-const { registerResident, registerSecurity, getAllResidents, getAllComplaints, getAllVisitors, getAllSecurity, updateCompliantStatus, amenities, addAmenities, adminBlockUnblockResident, deleteResident, updateResident, viewAmenitiesBookings, updateAmenitiesStatus, CreateNotice, setMaintenanceSetting, viewAllMaintenancePayments } = require('../controllers/admin.controller');
+const { registerResident, registerSecurity, getAllResidents, getAllComplaints, getAllVisitors, getAllSecurity, updateCompliantStatus, amenities, addAmenities, adminBlockUnblockResident, deleteResident, updateResident, viewAmenitiesBookings, updateAmenitiesStatus, CreateNotice, setMaintenanceSetting, viewAllMaintenancePayments, viewAllAmenities } = require('../controllers/admin.controller');
 const { verifyAndSaveSubscription, initiateSubscriptionPayment } = require('../controllers/payment.controller');
 
 const router = require('express').Router();
