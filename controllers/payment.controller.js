@@ -74,6 +74,7 @@ exports.verifyAndSavePayment = asyncHandler(async (req, res) => {
         amount,
         month,
         year,
+        frequency,
         paymentMethod,
         transactionId,
         status: "paid",
