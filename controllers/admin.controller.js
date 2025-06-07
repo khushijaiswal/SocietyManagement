@@ -317,28 +317,27 @@ exports.setMaintenanceSetting = asyncHandler(async (req, res) => {
         'July', 'August', 'September', 'October', 'November', 'December'
     ];
 
-    // Check if settings already exist for any month in the given year
-    const existingSettings = await MaintenanceSetting.find({ year });
-
-    if (existingSettings.length > 0) {
+    // Check if any setting exists for the year
+    const existing = await MaintenanceSetting.findOne({ year });
+    if (existing) {
         return res.status(409).json({ message: "Rates already set for this year" });
     }
 
-    // Create settings for all 12 months
-    const settingsToCreate = months.map((month) => ({
+    const settingsToInsert = months.map(month => ({
         monthlyRate,
         yearlyRate,
         month,
-        year,
+        year
     }));
 
-    const createdSettings = await MaintenanceSetting.insertMany(settingsToCreate);
+    const settings = await MaintenanceSetting.insertMany(settingsToInsert);
 
     return res.status(201).json({
-        message: "Maintenance settings for the full year created successfully",
-        settings: createdSettings
+        message: "Maintenance rates applied to the whole year",
+        settings
     });
 });
+
 
 
 
