@@ -1,4 +1,6 @@
-const maintenanceSettingSchema = new mongoose.Schema({
+const mongoose = require('mongoose');
+
+const MaintenanceSettingSchema = new mongoose.Schema({
     monthlyRate: {
         type: Number,
         required: true,
@@ -16,5 +18,4 @@ const maintenanceSettingSchema = new mongoose.Schema({
         required: true,
     },
 }, { timestamps: true });
-
-module.exports = mongoose.model('MaintenanceSetting', maintenanceSettingSchema);
+module.exports = mongoose.model('MaintenanceSetting', MaintenanceSettingSchema);
