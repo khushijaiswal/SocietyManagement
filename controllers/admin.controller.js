@@ -306,30 +306,40 @@ exports.CreateNotice = asyncHandler(async (req, res) => {
 
 // set maintenance setting
 exports.setMaintenanceSetting = asyncHandler(async (req, res) => {
-    const { monthlyRate, yearlyRate, month, year } = req.body;
+    const { monthlyRate, yearlyRate, year } = req.body;
 
-    if (!monthlyRate || !yearlyRate || !month || !year) {
+    if (!monthlyRate || !yearlyRate || !year) {
         return res.status(400).json({ message: "Please fill all fields" });
     }
 
-    // Prevent duplicate for the same month and year
-    const exists = await MaintenanceSetting.findOne({ month, year });
-    if (exists) {
-        return res.status(409).json({ message: "Rate already set for this period" });
+    const months = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+
+    // Check if settings already exist for any month in the given year
+    const existingSettings = await MaintenanceSetting.find({ year });
+
+    if (existingSettings.length > 0) {
+        return res.status(409).json({ message: "Rates already set for this year" });
     }
 
-    const setting = await MaintenanceSetting.create({
+    // Create settings for all 12 months
+    const settingsToCreate = months.map((month) => ({
         monthlyRate,
         yearlyRate,
         month,
-        year
-    });
+        year,
+    }));
+
+    const createdSettings = await MaintenanceSetting.insertMany(settingsToCreate);
 
     return res.status(201).json({
-        message: "Maintenance setting created successfully",
-        setting
+        message: "Maintenance settings for the full year created successfully",
+        settings: createdSettings
     });
 });
+
 
 
 
