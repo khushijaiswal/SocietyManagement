@@ -45,6 +45,7 @@ exports.verifyAndSavePayment = asyncHandler(async (req, res) => {
         amount,
         month,
         year,
+        frequency,
         paymentMethod,
         transactionId,
         razorpay_order_id,
