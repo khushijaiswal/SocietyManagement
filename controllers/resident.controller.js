@@ -53,33 +53,59 @@ exports.getActiveMaintenanceSetting = asyncHandler(async (req, res) => {
 });
 
 exports.maintenancePayment = asyncHandler(async (req, res) => {
-    const { amount, month, year, paymentMethod, transactionId, status } = req.body;
+    const {
+        amount,
+        month,
+        year,
+        paymentMethod,
+        transactionId,
+        status,
+        frequency, // e.g. 'Monthly' or 'Yearly'
+    } = req.body;
 
-    // Validate input
-    if (!amount || !month || !year || !paymentMethod) {
-        return res.status(400).json({ message: "Please fill all fields" });
+    // Check required fields
+    if (!amount || !month || !year || !paymentMethod || !frequency) {
+        return res.status(400).json({ message: "Please fill all required fields" });
     }
-    // resident.controller.js
-    const setting = await MaintenanceSetting.findOne({ isActive: true });
-    const expectedAmount = setting.frequency === 'Quarterly' ? setting.amount * 3 : setting.amount;
 
-    if (req.body.amount !== expectedAmount) {
-        return res.status(400).json({ message: "Amount mismatch with frequency" });
+    // Find maintenance setting for the given month and year
+    const setting = await MaintenanceSetting.findOne({ month, year });
+    if (!setting) {
+        return res.status(400).json({ message: "No maintenance setting found for this period" });
     }
 
+    // Determine expected amount
+    let expectedAmount;
+    if (frequency === 'Monthly') {
+        expectedAmount = setting.monthlyRate;
+    } else if (frequency === 'Yearly') {
+        // Validate: Yearly payments must be made in January
+        if (month !== 'January') {
+            return res.status(400).json({ message: "Yearly payments must be made in January" });
+        }
+        expectedAmount = setting.yearlyRate;
+    } else {
+        return res.status(400).json({ message: "Invalid frequency selected" });
+    }
 
-    // Optional: check for duplicate payment
+    // Amount validation
+    if (amount !== expectedAmount) {
+        return res.status(400).json({ message: "Amount does not match the expected rate for this frequency" });
+    }
+
+    // Prevent duplicate payment for the same user and period
     const existingPayment = await Maintenance.findOne({
         residentId: req.user,
         month,
-        year
+        year,
+        frequency,
     });
 
     if (existingPayment) {
-        return res.status(400).json({ message: "Payment for this month already exists" });
+        return res.status(409).json({ message: "Payment for this period and frequency already exists" });
     }
 
-    // Create new payment
+    // Save payment
     const newPayment = await Maintenance.create({
         residentId: req.user,
         amount,
@@ -87,14 +113,17 @@ exports.maintenancePayment = asyncHandler(async (req, res) => {
         year,
         paymentMethod,
         transactionId,
-        status: status || "paid",
+        frequency,
+        status: status || 'paid',
     });
 
     return res.status(201).json({
         message: "Payment recorded successfully",
-        data: newPayment
+        data: newPayment,
     });
 });
+
+
 
 exports.viewMaintenancePayments = asyncHandler(async (req, res) => {
     try {

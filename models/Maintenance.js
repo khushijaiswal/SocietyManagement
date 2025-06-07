@@ -33,6 +33,11 @@ const maintenanceSchema = new Schema({
         type: String,
         enum: ['online'],
     },
+    frequency: {
+        type: String,
+        enum: ['Monthly', 'Yearly'],
+        required: true,
+    },
     transactionId: {
         type: String,
         default: null

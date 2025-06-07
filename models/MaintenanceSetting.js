@@ -1,27 +1,20 @@
-const mongoose = require('mongoose');
-
-const MaintenanceSettingSchema = new mongoose.Schema({
-    amount: {
+const maintenanceSettingSchema = new mongoose.Schema({
+    monthlyRate: {
         type: Number,
-        required: true
+        required: true,
+    },
+    yearlyRate: {
+        type: Number,
+        required: true,
     },
     month: {
         type: String,
-        required: true
+        required: true,
     },
     year: {
         type: String,
-        required: true
+        required: true,
     },
-    frequency: {
-        type: String,
-        enum: ['Monthly', 'Quarterly'],
-        default: 'Monthly'
-    },
-    status: {
-        type: String,
-        enum: ['active', 'inactive'],
-        default: 'active'
-    }
 }, { timestamps: true });
-module.exports = mongoose.model('MaintenanceSetting', MaintenanceSettingSchema);
+
+module.exports = mongoose.model('MaintenanceSetting', maintenanceSettingSchema);

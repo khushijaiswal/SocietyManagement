@@ -306,19 +306,31 @@ exports.CreateNotice = asyncHandler(async (req, res) => {
 
 // set maintenance setting
 exports.setMaintenanceSetting = asyncHandler(async (req, res) => {
-    const { amount, month, year, frequency } = req.body
-    if (!amount || !month || !year || !frequency) {
-        return res.status(400).json({ message: "Please fill all fields" })
-    }
-    const setting = await MaintenanceSetting.create({
-        amount,
-        month,
-        year,
-        frequency
-    })
+    const { monthlyRate, yearlyRate, month, year } = req.body;
 
-    return res.status(201).json({ message: "Maintenance setting created successfully", setting })
-})
+    if (!monthlyRate || !yearlyRate || !month || !year) {
+        return res.status(400).json({ message: "Please fill all fields" });
+    }
+
+    // Prevent duplicate for the same month and year
+    const exists = await MaintenanceSetting.findOne({ month, year });
+    if (exists) {
+        return res.status(409).json({ message: "Rate already set for this period" });
+    }
+
+    const setting = await MaintenanceSetting.create({
+        monthlyRate,
+        yearlyRate,
+        month,
+        year
+    });
+
+    return res.status(201).json({
+        message: "Maintenance setting created successfully",
+        setting
+    });
+});
+
 
 
 exports.viewAllMaintenancePayments = asyncHandler(async (req, res) => {
