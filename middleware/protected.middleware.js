@@ -46,7 +46,7 @@ exports.residentProtected = async (req, res, next) => {
             return res.status(401).json({ message: "account block by admin" })
         }
         req.user = decode.id
-        // console.log("loggedIn user", req.loggedInUser);
+        // console.log("loggedIn user", req.user);
 
         next()
     })

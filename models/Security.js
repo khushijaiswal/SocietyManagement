@@ -20,6 +20,10 @@ const securitySchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
+    adminId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Admin',
+    },
     shift: {
         type: String,
         enum: ['morning', 'afternoon', 'night'],

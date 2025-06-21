@@ -151,6 +151,11 @@ exports.loginAdmin = asyncHandler(async (req, res) => {
     if (!admin) {
         return res.status(400).json({ message: "Admin not found. Please check email or phone" });
     }
+
+    // Check if admin is active
+    if (!admin.isActive) {
+        return res.status(403).json({ message: "Your account is inactive. Please contact support." });
+    }
     // Check password
     const isPasswordValid = await bcrypt.compare(password, admin.password);
     if (!isPasswordValid) {
@@ -158,7 +163,7 @@ exports.loginAdmin = asyncHandler(async (req, res) => {
     }
     // Create JWT token
     const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET, { expiresIn: "30d" });
-    // console.log("admin token", token);
+
     // Set cookie
     res.cookie("admin", token, { httpOnly: true, secure: true, sameSite: "None", maxAge: process.env.MAX_AGE });
     return res.status(200).json({ message: "Admin logged in successfully", admin });
@@ -189,10 +194,17 @@ exports.loginResident = asyncHandler(async (req, res) => {
         return res.status(400).json({ message: "Invalid email or phone number" });
     }
     // Find resident by email or phone
-    const resident = await Resident.findOne({ $or: [{ email: username }, { phone: username }] });
+    const resident = await Resident.findOne({ $or: [{ email: username }, { phone: username }] })
+        .populate('adminId', 'isActive')
     if (!resident) {
         return res.status(400).json({ message: "Resident not found. Please check email or phone" });
     }
+
+    // Check if admin/society is active
+    if (!resident.adminId || !resident.adminId.isActive) {
+        return res.status(403).json({ message: "Society is currently inactive. Please contact your admin." });
+    }
+
     // Check password
     const isPasswordValid = await bcrypt.compare(password, resident.password);
     if (!isPasswordValid) {
@@ -236,10 +248,14 @@ exports.loginSecurity = asyncHandler(async (req, res) => {
 
     const security = await Security.findOne({
         $or: [{ email: username }, { phone: username }]
-    });
+    }).populate('adminId', 'isActive')
 
     if (!security) {
         return res.status(400).json({ message: "Security user not found" });
+    }
+    // Check if admin/society is active
+    if (!security.adminId || !security.adminId.isActive) {
+        return res.status(403).json({ message: "Society is currently inactive. Please contact your admin." });
     }
 
     const otp = generateOTP();

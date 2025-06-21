@@ -5,7 +5,7 @@ const pricingPlanSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
-        enum: ['Free', 'Pro', 'Pro Plus'],
+        enum: ['Free', 'Pro', 'ProPlus', 'Gold'],
     },
     price: {
         type: Number,
@@ -43,10 +43,7 @@ const pricingPlanSchema = new mongoose.Schema({
         type: Boolean,
         default: true,
     },
-    createdAt: {
-        type: Date,
-        default: Date.now,
-    }
+
 }, { timestamps: true });
 
 

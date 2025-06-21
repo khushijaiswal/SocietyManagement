@@ -68,8 +68,12 @@ exports.maintenancePayment = asyncHandler(async (req, res) => {
         return res.status(400).json({ message: "Please fill all required fields" });
     }
 
-    // Find maintenance setting for the given month and year
-    const setting = await MaintenanceSetting.findOne({ month, year });
+    // Normalize month input (case-insensitive match)
+    const setting = await MaintenanceSetting.findOne({
+        month: { $regex: new RegExp(`^${month}$`, 'i') },
+        year
+    });
+
     if (!setting) {
         return res.status(400).json({ message: "No maintenance setting found for this period" });
     }
@@ -79,7 +83,6 @@ exports.maintenancePayment = asyncHandler(async (req, res) => {
     if (frequency === 'Monthly') {
         expectedAmount = setting.monthlyRate;
     } else if (frequency === 'Yearly') {
-        // Validate: Yearly payments must be made in January
         if (month !== 'January') {
             return res.status(400).json({ message: "Yearly payments must be made in January" });
         }
@@ -88,24 +91,24 @@ exports.maintenancePayment = asyncHandler(async (req, res) => {
         return res.status(400).json({ message: "Invalid frequency selected" });
     }
 
-    // Amount validation
-    if (amount !== expectedAmount) {
+    // Validate amount
+    if (Number(amount) !== Number(expectedAmount)) {
         return res.status(400).json({ message: "Amount does not match the expected rate for this frequency" });
     }
 
-    // Prevent duplicate payment for the same user and period
+    // Prevent duplicate payments
     const existingPayment = await Maintenance.findOne({
         residentId: req.user,
         month,
         year,
-        frequency,
+        frequency
     });
 
     if (existingPayment) {
         return res.status(409).json({ message: "Payment for this period and frequency already exists" });
     }
 
-    // Save payment
+    // Create new payment
     const newPayment = await Maintenance.create({
         residentId: req.user,
         amount,
@@ -114,14 +117,15 @@ exports.maintenancePayment = asyncHandler(async (req, res) => {
         paymentMethod,
         transactionId,
         frequency,
-        status: status || 'paid',
+        status: status || 'paid'
     });
 
     return res.status(201).json({
         message: "Payment recorded successfully",
-        data: newPayment,
+        data: newPayment
     });
 });
+
 
 
 

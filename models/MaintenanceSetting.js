@@ -14,8 +14,13 @@ const MaintenanceSettingSchema = new mongoose.Schema({
         required: true,
     },
     year: {
-        type: String,
+        type: Number,
         required: true,
+    },
+    status: {
+        type: String,
+        enum: ['active', 'inactive'],
+        default: 'active'
     },
 }, { timestamps: true });
 module.exports = mongoose.model('MaintenanceSetting', MaintenanceSettingSchema);

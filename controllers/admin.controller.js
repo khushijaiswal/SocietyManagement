@@ -84,8 +84,10 @@ exports.registerSecurity = asyncHandler(async (req, res) => {
     //     isActive: true,
     // });
 
-    const newSecurity = await Security.create(req.body)
-    return res.status(201).json({ message: "Security registered successfully", newSecurity });
+    const newSecurity = await Security.create({
+        ...req.body,
+        adminId: req.adminId,
+    }); return res.status(201).json({ message: "Security registered successfully", newSecurity });
 }
 
 );
@@ -121,10 +123,11 @@ exports.getAllComplaints = asyncHandler(async (req, res) => {
 // get all security
 exports.getAllSecurity = asyncHandler(async (req, res) => {
     try {
-        const security = await security.find().select("-password -__v")
+        const security = await Security.find().select("-__v")
         return res.status(200).json({ message: "All security fetched successfully", security });
     }
     catch (error) {
+        console.log(error)
         return res.status(500).json({ message: "Error fetching security", error });
     }
 }
@@ -253,12 +256,35 @@ exports.adminBlockUnblockResident = async (req, res) => {
     }
 }
 
+// block unblock security
+
+exports.adminBlockUnblockSecurity = async (req, res) => {
+    try {
+        await Security.findByIdAndUpdate(req.params.sid, { isActive: req.body.isActive }, { new: true })
+        res.json({ message: "Security Account block success" })
+    } catch (error) {
+        console.log(error)
+        res.status(400).json({ message: "something went wrong" })
+    }
+}
+
 // delete resident
 
 exports.deleteResident = async (req, res) => {
     try {
         await Resident.findByIdAndDelete(req.params.rid)
         res.json({ message: "Resident Account delete success" })
+    } catch (error) {
+        console.log(error)
+        res.status(400).json({ message: "something went wrong" })
+    }
+}
+// delete security
+
+exports.deleteSecurity = async (req, res) => {
+    try {
+        await Security.findByIdAndDelete(req.params.sid)
+        res.json({ message: "Security Account delete success" })
     } catch (error) {
         console.log(error)
         res.status(400).json({ message: "something went wrong" })
@@ -281,6 +307,25 @@ exports.updateResident = async (req, res) => {
             return res.status(404).json({ message: "Resident not found" });
         }
         res.json(updatedResident);
+    } catch (error) {
+        console.error("Update Error:", error);
+        res.status(400).json({ message: "Something went wrong" });
+    }
+};
+// security Update Route
+exports.updateSecurity = async (req, res) => {
+    const { sid } = req.params;
+    const { name, email, phone, assignedArea, shift, isActive } = req.body.updateData;
+    try {
+        const updatedSecurity = await Security.findByIdAndUpdate(
+            sid,
+            { name, email, phone, assignedArea, shift, isActive },
+            { new: true }
+        );
+        if (!updatedSecurity) {
+            return res.status(404).json({ message: "Security not found" });
+        }
+        res.json(updatedSecurity);
     } catch (error) {
         console.error("Update Error:", error);
         res.status(400).json({ message: "Something went wrong" });

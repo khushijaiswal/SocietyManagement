@@ -96,6 +96,23 @@ exports.initiateSubscriptionPayment = asyncHandler(async (req, res) => {
         return res.status(404).json({ message: 'Plan not found' });
     }
 
+    // ✅ If free plan, skip Razorpay and return dummy values
+    if (plan.price === 0) {
+        return res.status(200).json({
+            id: `free_plan_${Math.floor(Math.random() * 1000000)}`,
+            amount: 0,
+            currency: 'INR',
+            description: plan.description,
+            name: "Free Plan",
+            email: "",
+            contact: "",
+            isFree: true
+        });
+    }
+
+    console.log("Selected plan price:", plan.price);
+
+
     const instance = new Razorpay({
         key_id: process.env.RAZORPAY_API_KEY,
         key_secret: process.env.RAZORPAY_SCERET_KEY,
@@ -112,11 +129,49 @@ exports.initiateSubscriptionPayment = asyncHandler(async (req, res) => {
         const order = await instance.orders.create(options);
         res.status(200).json(order);
     } catch (error) {
+        console.error("Subscription Error:", error);
         res.status(500).json({ message: 'Unable to initiate subscription payment' });
     }
 });
 
+
 // // ✅ NEW: VERIFY & SAVE SUBSCRIPTION PAYMENT
+// exports.verifyAndSaveSubscription = asyncHandler(async (req, res) => {
+//     const {
+//         adminId,
+//         planId,
+//         transactionId,
+//         razorpay_order_id,
+//         razorpay_signature
+//     } = req.body;
+
+//     const expectedSignature = crypto
+//         .createHmac("sha256", process.env.RAZORPAY_SCERET_KEY)
+//         .update(`${razorpay_order_id}|${transactionId}`)
+//         .digest("hex");
+
+//     if (expectedSignature !== razorpay_signature) {
+//         return res.status(400).json({ message: "Invalid signature from Razorpay" });
+//     }
+
+//     // Update admin with subscribed plan
+//     const updatedAdmin = await Admin.findByIdAndUpdate(
+//         adminId,
+//         {
+//             subscriptionPlan: planId,
+//             subscriptionStatus: "active",
+//             subscriptionPaidAt: new Date(),
+//         },
+//         { new: true }
+//     );
+
+//     res.status(200).json({
+//         message: "Subscription successful and verified",
+//         success: true,
+//         admin: updatedAdmin
+//     });
+// });
+
 exports.verifyAndSaveSubscription = asyncHandler(async (req, res) => {
     const {
         adminId,
@@ -126,16 +181,21 @@ exports.verifyAndSaveSubscription = asyncHandler(async (req, res) => {
         razorpay_signature
     } = req.body;
 
-    const expectedSignature = crypto
-        .createHmac("sha256", process.env.RAZORPAY_SCERET_KEY)
-        .update(`${razorpay_order_id}|${transactionId}`)
-        .digest("hex");
+    // ✅ Skip signature check if it's a free plan
+    const isFreePlan = transactionId?.startsWith("free_plan_");
 
-    if (expectedSignature !== razorpay_signature) {
-        return res.status(400).json({ message: "Invalid signature from Razorpay" });
+    if (!isFreePlan) {
+        const expectedSignature = crypto
+            .createHmac("sha256", process.env.RAZORPAY_SCERET_KEY)
+            .update(`${razorpay_order_id}|${transactionId}`)
+            .digest("hex");
+
+        if (expectedSignature !== razorpay_signature) {
+            return res.status(400).json({ message: "Invalid signature from Razorpay" });
+        }
     }
 
-    // Update admin with subscribed plan
+    // ✅ Update admin with the selected plan
     const updatedAdmin = await Admin.findByIdAndUpdate(
         adminId,
         {
