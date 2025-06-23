@@ -264,7 +264,7 @@ exports.loginSecurity = asyncHandler(async (req, res) => {
     await sendEmail({
         message: `<h1>Your OTP is ${otp}</h1>`,
         subject: "verify otp to login",
-        to: result.email
+        to: security.email
     })
     // const token = jwt.sign({ _id: security._id }, process.env.JWT_SECRET, { expiresIn: '30d' })
     // res.cookie('security', token, { httpOnly: true, secure: true, sameSite: "None", maxAge: process.env.MAX_AGE });
