@@ -7,7 +7,8 @@ const Resident = require("../models/Resident");
 const Security = require("../models/Security");
 const redisClient = require("./../utils/redisClient");
 const validator = require("validator");
-const generateOTP = require("../utils/otp")
+const generateOTP = require("../utils/otp");
+const { sendEmail } = require("../utils/email");
 require("dotenv").config();
 
 // @desc Register a new admin
@@ -260,6 +261,11 @@ exports.loginSecurity = asyncHandler(async (req, res) => {
 
     const otp = generateOTP();
     await Security.findByIdAndUpdate(security._id, { otp, otpSendOn: Date.now() })
+    await sendEmail({
+        message: `<h1>Your OTP is ${otp}</h1>`,
+        subject: "verify otp to login",
+        to: result.email
+    })
     // const token = jwt.sign({ _id: security._id }, process.env.JWT_SECRET, { expiresIn: '30d' })
     // res.cookie('security', token, { httpOnly: true, secure: true, sameSite: "None", maxAge: process.env.MAX_AGE });
     // TODO: send OTP via SMS/Email here
