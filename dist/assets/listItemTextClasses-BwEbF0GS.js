@@ -1,0 +1,1 @@
+import{G as s,F as e}from"./index-TOg4iC9X.js";function a(t){return e("MuiListItemIcon",t)}const n=s("MuiListItemIcon",["root","alignItemsFlexStart"]);function l(t){return e("MuiListItemText",t)}const o=s("MuiListItemText",["root","multiline","dense","inset","primary","secondary"]);export{l as a,n as b,a as g,o as l};

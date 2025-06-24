@@ -31,9 +31,9 @@ app.use("/api/resident", residentProtected, residentRoutes)
 app.use("/api/security", securityProtected, securityRoutes)
 
 
-app.use("*", (req, res) => {
-    res.status(404).json({ message: "resource not found" })
-})
+// app.use("*", (req, res) => {
+//     res.status(404).json({ message: "resource not found" })
+// })
 
 app.use("*", (req, res) => {
     res.sendFile(path.join(__dirname, "dist", "index.html"))
