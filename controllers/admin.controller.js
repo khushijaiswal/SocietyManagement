@@ -109,7 +109,7 @@ exports.getAllResidents = asyncHandler(async (req, res) => {
 // get all complaints
 exports.getAllComplaints = asyncHandler(async (req, res) => {
     try {
-        const complaints = await Complaint.find({ adminId: req.user })
+        const complaints = await Complaint.find({ adminId: req.adminId })
             .sort({ createdAt: -1 })
             .populate("resident", "name email phone flatNumber")
         return res.status(200).json({ message: "All complaints fetched successfully", complaints });
@@ -123,7 +123,7 @@ exports.getAllComplaints = asyncHandler(async (req, res) => {
 // get all security
 exports.getAllSecurity = asyncHandler(async (req, res) => {
     try {
-        const security = await Security.find().select("-__v")
+        const security = await Security.find({ adminId: req.adminId }).select("-__v")
         return res.status(200).json({ message: "All security fetched successfully", security });
     }
     catch (error) {
@@ -136,7 +136,7 @@ exports.getAllSecurity = asyncHandler(async (req, res) => {
 // get all visitors
 exports.getAllVisitors = asyncHandler(async (req, res) => {
     try {
-        const visitors = await Visitor.find().select("-__v").populate('guardId', 'name phone')
+        const visitors = await Visitor.find({ adminId: req.adminId }).select("-__v").populate('guardId', 'name phone')
         return res.status(200).json({ message: "All visitors fetched successfully", visitors });
     }
     catch (error) {
